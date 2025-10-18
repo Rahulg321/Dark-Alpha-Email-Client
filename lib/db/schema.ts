@@ -80,6 +80,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   sentEmails: many(emails, { relationName: 'sender' }),
   receivedEmails: many(emails, { relationName: 'recipient' }),
   userFolders: many(userFolders),
+  templates: many(templates),
 }));
 
 export const threadsRelations = relations(threads, ({ many }) => ({
@@ -127,3 +128,22 @@ export const threadFoldersRelations = relations(threadFolders, ({ one }) => ({
     references: [folders.id],
   }),
 }));
+
+export const templates = pgTable(
+  'templates',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 100 }).notNull(),
+    userId: integer('user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    subject: varchar('subject', { length: 255 }), 
+    body: text('body').notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  (table) => {
+    return {
+      templateUserIdIndex: index('template_user_id_idx').on(table.userId),
+    };
+  },
+);
