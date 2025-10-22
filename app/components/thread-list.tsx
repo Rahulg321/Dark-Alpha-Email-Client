@@ -7,6 +7,7 @@ import { PenSquare, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { NavMenu } from './menu';
+import { Button } from '@/components/ui/button'; // --- ADDED THIS IMPORT ---
 
 type Email = Omit<typeof emails.$inferSelect, 'threadId'> & {
   sender: Pick<User, 'id' | 'firstName' | 'lastName' | 'email'>;
@@ -43,12 +44,17 @@ export function ThreadHeader({
         </h1>
       </div>
       <div className="flex items-center space-x-2">
-        <Link
-          href={`/f/${folderName}/new`}
-          className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-gray-100"
-        >
-          <PenSquare size={18} />
-        </Link>
+        
+        {/* --- THIS IS THE MODIFIED COMPOSE BUTTON --- */}
+        {/* It now links to the .../template page */}
+        <Button asChild>
+          <Link href={`/f/template`}>
+            <PenSquare size={18} className="mr-2" />
+            Compose
+          </Link>
+        </Button>
+        {/* --- END MODIFICATION --- */}
+
         <Link
           href="/search"
           className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-gray-100"
@@ -60,6 +66,7 @@ export function ThreadHeader({
   );
 }
 
+// --- This component is unchanged ---
 export function ThreadList({ folderName, threads }: ThreadListProps) {
   const [hoveredThread, setHoveredThread] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);

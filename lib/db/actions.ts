@@ -239,3 +239,28 @@ export async function deleteTemplateAction(templateId: string) {
     return { success: false, error: 'Failed to delete template.' };
   }
 }
+// --- ADD THIS NEW ACTION ---
+export async function getTemplateByIdAction(templateId: number) {
+  const userId = 1; // Assuming user ID 1 for now, as before
+  
+  try {
+    const data = await db
+      .select({
+        subject: templates.subject,
+        body: templates.body,
+      })
+      .from(templates)
+      .where(
+        and(eq(templates.id, templateId), eq(templates.userId, userId))
+      )
+      .limit(1);
+
+    if (data.length === 0) {
+      return { success: false, error: 'Template not found.' };
+    }
+    return { success: true, data: data[0] };
+  } catch (error) {
+    console.error('Action Error getting template by ID:', error);
+    return { success: false, error: 'Failed to load template.' };
+  }
+}
