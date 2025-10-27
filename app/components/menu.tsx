@@ -1,10 +1,22 @@
+// app/components/menu.tsx
+'use client';
+
 import {
   Sheet,
   SheetContent,
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Check, FileText, Menu, Send, Star, Trash } from 'lucide-react';
+// --- ADDED LayoutTemplate icon ---
+import {
+  Check,
+  FileText,
+  Menu,
+  Send,
+  Star,
+  Trash,
+  LayoutTemplate, // Make sure this is imported
+} from 'lucide-react';
 import Link from 'next/link';
 
 export function NavMenu() {
@@ -42,6 +54,17 @@ export function NavMenu() {
             <FileText size={20} />
             <span>Drafts</span>
           </Link>
+
+          {/* --- ADDED TEMPLATES LINK --- */}
+          <Link
+            href="/f/templates" // This now links to your new page
+            className="flex items-center space-x-2 rounded p-2 text-gray-700 hover:bg-gray-100"
+          >
+            <LayoutTemplate size={20} />
+            <span>Templates</span>
+          </Link>
+          {/* --- END --- */}
+
           <Link
             href="/f/sent"
             className="flex items-center space-x-2 rounded p-2 text-gray-700 hover:bg-gray-100"

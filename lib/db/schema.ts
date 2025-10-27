@@ -76,10 +76,30 @@ export const threadFolders = pgTable('thread_folders', {
   folderId: integer('folder_id').references(() => folders.id),
 });
 
+//new changes by mataha-> added templates table
+export const templates = pgTable('templates', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull(),
+  subject: varchar('subject', { length: 255 }),
+  body: text('body'),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+export const templatesRelations = relations(templates, ({ one }) => ({
+  user: one(users, {
+    fields: [templates.userId],
+    references: [users.id],
+  }),
+}));
+
 export const usersRelations = relations(users, ({ many }) => ({
   sentEmails: many(emails, { relationName: 'sender' }),
   receivedEmails: many(emails, { relationName: 'recipient' }),
   userFolders: many(userFolders),
+  templates: many(templates),
 }));
 
 export const threadsRelations = relations(threads, ({ many }) => ({
