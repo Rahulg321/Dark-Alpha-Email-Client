@@ -15,7 +15,18 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { TemplateEditorModal } from './template-editor-modal'; // We will create this
+import { TemplateEditorModal } from './template-editor-modal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface Template {
   id: number;
@@ -33,15 +44,14 @@ export function TemplateCard({
   template,
   onActionComplete,
 }: TemplateCardProps) {
-  const handleDelete = async () => {
-    if (confirm(`Are you sure you want to delete "${template.name}"?`)) {
-      const result = await deleteTemplateAction(String(template.id));
-      if (result.success) {
-        toast.success('Template deleted.');
-        onActionComplete();
-      } else {
-        toast.error(result.error);
-      }
+  
+  const handleConfirmDelete = async () => {
+    const result = await deleteTemplateAction(String(template.id));
+    if (result.success) {
+      toast.success('Template deleted.');
+      onActionComplete();
+    } else {
+      toast.error(result.error as string);
     }
   };
 
@@ -57,15 +67,33 @@ export function TemplateCard({
         </p>
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
+
         <TemplateEditorModal
           template={template}
           onActionComplete={onActionComplete}
         >
           <Button variant="outline">Edit</Button>
         </TemplateEditorModal>
-        <Button variant="destructive" onClick={handleDelete}>
-          Delete
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive">Delete</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the
+                template "{template.name}".
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmDelete}>
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardFooter>
     </Card>
   );

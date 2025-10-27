@@ -1,4 +1,3 @@
-// app/templates/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,7 +7,6 @@ import { TemplateCard } from '@/app/components/template-card';
 import { TemplateEditorModal } from '@/app/components/template-editor-modal';
 import { PlusCircle } from 'lucide-react';
 
-// This type must match your database schema
 interface Template {
   id: number;
   name: string;
@@ -21,22 +19,21 @@ export default function TemplatesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Function to load templates
-const loadTemplates = async () => {
+  const loadTemplates = async () => {
     setIsLoading(true);
     const result = await getTemplatesAction();
 
-    // This is the updated part:
     if (result.success && result.data) {
-      // We add && result.data to explicitly check that data is not undefined.
       setTemplates(result.data);
       setError(null);
     } else {
-      // We provide a fallback error message in case result.error is also undefined.
       setError(result.error || 'An unknown error occurred.');
     }
     setIsLoading(false);
   };
+  useEffect(() => {
+    loadTemplates();
+  }, []);
 
   return (
     <div className="p-4 md:p-8">
