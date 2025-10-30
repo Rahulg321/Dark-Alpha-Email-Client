@@ -33,10 +33,31 @@ export async function getFoldersWithThreadCount() {
   return { specialFolders, otherFolders };
 }
 
-export async function getThreadsForFolder(folderName: string) {
+export async function getThreadsForFolder(
+  folderName: string,
+  options?: {
+    limit?: number;
+    cursor?: { lastActivityDate: string; id: number };
+  },
+) {
   'use cache';
 
   let originalFolderName = toTitleCase(decodeURIComponent(folderName));
+  const limit = options?.limit || 50;
+  const cursor = options?.cursor;
+
+  let whereConditions = cursor
+    ? and(
+        eq(folders.name, originalFolderName),
+        or(
+          sql`${threads.lastActivityDate} < ${new Date(cursor.lastActivityDate)}`,
+          and(
+            sql`${threads.lastActivityDate} = ${new Date(cursor.lastActivityDate)}`,
+            sql`${threads.id} < ${cursor.id}`,
+          ),
+        ),
+      )
+    : eq(folders.name, originalFolderName);
 
   const threadsWithEmails = await db
     .select({
@@ -78,11 +99,27 @@ export async function getThreadsForFolder(folderName: string) {
     .innerJoin(folders, eq(threadFolders.folderId, folders.id))
     .innerJoin(emails, eq(threads.id, emails.threadId))
     .innerJoin(users, eq(emails.senderId, users.id))
-    .where(eq(folders.name, originalFolderName))
+    .where(whereConditions)
     .groupBy(threads.id)
-    .orderBy(desc(threads.lastActivityDate));
+    .orderBy(desc(threads.lastActivityDate), desc(threads.id))
+    .limit(limit + 1);
 
-  return threadsWithEmails;
+  const hasMore = threadsWithEmails.length > limit;
+  const results = hasMore
+    ? threadsWithEmails.slice(0, limit)
+    : threadsWithEmails;
+
+  return {
+    threads: results,
+    hasMore,
+    nextCursor:
+      hasMore && results.length > 0
+        ? {
+            lastActivityDate: results[results.length - 1].lastActivityDate!,
+            id: results[results.length - 1].id,
+          }
+        : null,
+  };
 }
 
 export async function searchThreads(search: string | undefined) {

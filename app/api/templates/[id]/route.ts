@@ -4,8 +4,12 @@ import { templates } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 // --- READ Single (GET): Retrieve a specific template by ID ---
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-    const templateId = parseInt(params.id);
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const templateId = parseInt(id);
     if (isNaN(templateId)) {
         return new NextResponse('Invalid Template ID', { status: 400 });
     }
@@ -25,8 +29,12 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 // --- UPDATE (PUT/PATCH): Update a specific template by ID ---
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-    const templateId = parseInt(params.id);
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const templateId = parseInt(id);
     if (isNaN(templateId)) {
         return new NextResponse('Invalid Template ID', { status: 400 });
     }
@@ -54,8 +62,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 // --- DELETE (DELETE): Delete a specific template by ID ---
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-    const templateId = parseInt(params.id);
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const templateId = parseInt(id);
     if (isNaN(templateId)) {
         return new NextResponse('Invalid Template ID', { status: 400 });
     }
