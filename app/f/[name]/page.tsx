@@ -48,7 +48,15 @@ async function Threads({
 }) {
   let { name } = await params;
   let { q } = await searchParams;
-  let threads = await getThreadsForFolder(name);
+  let { threads, hasMore, nextCursor } = await getThreadsForFolder(name);
 
-  return <ThreadList folderName={name} threads={threads} searchQuery={q} />;
+  return (
+    <ThreadList
+      folderName={name}
+      threads={threads}
+      searchQuery={q}
+      hasMore={hasMore}
+      nextCursor={nextCursor}
+    />
+  );
 }

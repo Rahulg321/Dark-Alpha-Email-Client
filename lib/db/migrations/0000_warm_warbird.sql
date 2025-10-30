@@ -45,6 +45,14 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"avatar_url" varchar(255)
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "templates" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" varchar(100) NOT NULL,
+	"user_id" integer NULL,
+	"subject" varchar(255),
+	"body" text NOT NULL,
+	"created_at" timestamp DEFAULT now(),
+)
 DO $$ BEGIN
  ALTER TABLE "emails" ADD CONSTRAINT "emails_thread_id_threads_id_fk" FOREIGN KEY ("thread_id") REFERENCES "public"."threads"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
@@ -87,8 +95,15 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "templates" ADD CONSTRAINT "templates_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE SET NULL ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
 CREATE INDEX IF NOT EXISTS "thread_id_idx" ON "emails" USING btree ("thread_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "sender_id_idx" ON "emails" USING btree ("sender_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "recipient_id_idx" ON "emails" USING btree ("recipient_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "sent_date_idx" ON "emails" USING btree ("sent_date");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "email_idx" ON "users" USING btree ("email");
+CREATE INDEX IF NOT EXISTS "template_user_id_idx" ON "templates" USING btree ("user_id");
