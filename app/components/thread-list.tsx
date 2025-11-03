@@ -44,7 +44,7 @@ export function ThreadHeader({
       </div>
       <div className="flex items-center space-x-2">
         <Link
-          href={`/f/${folderName}/new`}
+          href={`/f/${folderName}/template`}
           className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-gray-100"
         >
           <PenSquare size={18} />
@@ -95,38 +95,49 @@ export function ThreadList({ folderName, threads }: ThreadListProps) {
       <div className="h-[calc(100vh-64px)] overflow-auto">
         {threads.map((thread) => {
           const latestEmail = thread.emails[0];
+          const isUnread = thread.emails.some((e) => !(e as any).read);
 
           return (
             <Link
               key={thread.id}
               href={`/f/${folderName.toLowerCase()}/${thread.id}`}
-              className="block cursor-pointer border-b border-gray-100 hover:bg-gray-50"
+              className={`block transition-colors ${
+                isUnread ? 'bg-white hover:bg-accent' : 'bg-muted hover:bg-accent'
+              }`}
+              onMouseEnter={() => handleMouseEnter(thread.id)}
+              onMouseLeave={handleMouseLeave}
             >
-              <div
-                className="flex items-center"
-                onMouseEnter={() => handleMouseEnter(thread.id)}
-                onMouseLeave={handleMouseLeave}
-              >
-                <div className="flex grow items-center overflow-hidden p-4">
-                  <div className="mr-4 w-[200px] shrink-0">
-                    <span className="truncate font-medium">
+              <div className="flex items-start justify-between p-4 border-b">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span
+                      className={`text-sm truncate ${
+                        isUnread ? 'font-semibold' : 'font-medium'
+                      }`}
+                    >
                       {formatEmailString(latestEmail.sender)}
                     </span>
+                    {isUnread && <span className="h-2 w-2 rounded-full bg-primary" />}
                   </div>
-                  <div className="flex grow items-center overflow-hidden">
-                    <span className="mr-2 max-w-[400px] min-w-[175px] truncate font-medium">
-                      {thread.subject}
-                    </span>
-                    <span className="truncate text-gray-600">
-                      {latestEmail.body}
-                    </span>
-                  </div>
+
+                  <h3
+                    className={`truncate ${
+                      isUnread ? 'font-semibold' : 'font-medium'
+                    }`}
+                  >
+                    {thread.subject || '(No Subject)'}
+                  </h3>
+
+                  <p className="truncate text-sm text-muted-foreground">
+                    {latestEmail.body}
+                  </p>
                 </div>
-                <div className="flex w-40 shrink-0 items-center justify-end p-4">
+
+                <div className="flex items-center shrink-0 ml-4">
                   {!isMobile && hoveredThread === thread.id ? (
                     <ThreadActions threadId={thread.id} />
                   ) : (
-                    <span className="text-sm text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       {new Date(thread.lastActivityDate!).toLocaleDateString()}
                     </span>
                   )}

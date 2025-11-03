@@ -1,56 +1,93 @@
-import { LeftSidebar } from '@/app/components/left-sidebar';
-import { ThreadActions } from '@/app/components/thread-actions';
-import { getEmailsForThread } from '@/lib/db/queries';
-import { notFound } from 'next/navigation';
+import { GmailSidebar } from "@/app/components/gmail-sidebar"
+import { ThreadActions } from "@/app/components/thread-actions"
+import { Button } from "@/components/ui/button"
+import { getEmailsForThread } from "@/lib/db/queries"
+import { ArrowLeft, Reply, ReplyAll, Forward } from "lucide-react"
+import Link from "next/link"
+import { notFound } from "next/navigation"
 
 export default async function EmailPage({
   params,
 }: {
-  params: Promise<{ name: string; id: string }>;
+  params: Promise<{ name: string; id: string }>
 }) {
-  let id = (await params).id;
-  let thread = await getEmailsForThread(id);
+  const { name, id } = await params
+  const thread = await getEmailsForThread(id)
 
   if (!thread || thread.emails.length === 0) {
-    notFound();
+    notFound()
   }
 
   return (
-    <div className="flex h-full grow">
-      <LeftSidebar />
-      <div className="grow overflow-auto p-2 sm:p-6">
-        <div className="mx-auto max-w-4xl">
-          <div className="mx-6 mb-6 flex flex-col items-start justify-between sm:flex-row">
-            <h1 className="mt-4 max-w-2xl grow pr-4 text-2xl font-semibold sm:mt-0">
-              {thread.subject}
-            </h1>
-            <div className="mt-2 flex shrink-0 items-center space-x-1 sm:mt-0">
-              <button className="mr-2 cursor-pointer text-sm font-medium text-gray-700">
-                Share
-              </button>
-              <ThreadActions threadId={thread.id} />
-            </div>
-          </div>
-          <div className="space-y-6">
-            {thread.emails.map((email) => (
-              <div key={email.id} className="rounded-lg bg-gray-50 px-6 py-4">
-                <div className="mb-2 flex flex-col items-start justify-between sm:flex-row sm:items-center">
-                  <div className="font-semibold">
-                    {email.sender.firstName} {email.sender.lastName} to{' '}
-                    {email.recipientId === thread.emails[0].sender.id
-                      ? 'Me'
-                      : 'All'}
+    <div className="flex h-screen overflow-hidden bg-background">
+      <GmailSidebar />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex h-14 items-center gap-3 border-b border-border px-6">
+          <Link href={`/f/${name}`}>
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-accent">
+              <ArrowLeft size={20} />
+            </Button>
+          </Link>
+          <div className="flex-1" />
+          <ThreadActions threadId={thread.id} />
+        </div>
+
+        <div className="flex-1 overflow-auto">
+          <div className="mx-auto max-w-4xl px-6 py-8">
+            <h1 className="mb-8 text-2xl font-normal text-foreground tracking-tight">{thread.subject}</h1>
+
+            <div className="space-y-6">
+              {thread.emails.map((email, index) => (
+                <div key={email.id} className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                  {/* Email header */}
+                  <div className="mb-5 flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
+                        {email.sender.firstName[0]}
+                        {email.sender.lastName[0]}
+                      </div>
+                      <div>
+                        <div className="font-medium text-foreground">
+                          {email.sender.firstName} {email.sender.lastName}
+                        </div>
+                        <div className="text-sm text-muted-foreground">{email.sender.email}</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground font-medium">
+                      {new Date(email.sentDate!).toLocaleString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {new Date(email.sentDate!).toLocaleString()}
-                  </div>
+
+                  {/* Email body */}
+                  <div className="whitespace-pre-wrap text-foreground leading-relaxed">{email.body}</div>
+
+                  {index === thread.emails.length - 1 && (
+                    <div className="mt-6 flex gap-2">
+                      <Button variant="outline" size="sm" className="gap-2 rounded-full bg-transparent">
+                        <Reply size={16} />
+                        Reply
+                      </Button>
+                      <Button variant="outline" size="sm" className="gap-2 rounded-full bg-transparent">
+                        <ReplyAll size={16} />
+                        Reply all
+                      </Button>
+                      <Button variant="outline" size="sm" className="gap-2 rounded-full bg-transparent">
+                        <Forward size={16} />
+                        Forward
+                      </Button>
+                    </div>
+                  )}
                 </div>
-                <div className="whitespace-pre-wrap">{email.body}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
